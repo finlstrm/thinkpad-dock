@@ -1,0 +1,7 @@
+#stages:
+#   - build-deploy
+#
+#run-package-build:
+#   stage: build-deploy
+#   script:
+#      - /slashetc/admin/build-tools/bin/package_build.sh --buildtype=gitlab --branch=$CI_BUILD_REF_NAME --revision=$CI_BUILD_REF --sendToApt

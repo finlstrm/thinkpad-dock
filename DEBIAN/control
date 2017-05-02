@@ -1,0 +1,7 @@
+Package: thinkpad-dock
+Version: VERSION
+Architecture: ARCH
+Essential: no
+Maintainer: Michael J. Ford <Michael.Ford@slashetc.us>
+Installed-Size: INSTSIZE
+Description: A nice daemon and set of scripts for thinkpads and docks
