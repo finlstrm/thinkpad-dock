@@ -1,0 +1,44 @@
+#!/usr/bin/python3
+#------------------------------------------------------------------------------
+#
+# Name: thinkpad-dock.py
+#
+# Provides: Listening pyudev daemon calls thinkpad-dock.sh on any device insertion
+#
+# Usage: can be called directly for debug. Started normally by systemd
+#
+# todo list:
+#   - Move most (if not all) processes from thinkpad-dock.sh to this script
+#   - Add logging to syslog
+#
+#------------------------------------------------------------------------------
+#
+# LastMod: 20170502 - Michael J. Ford <Michael.Ford@slashetc.us>
+#     - created
+#
+#------------------------------------------------------------------------------
+# --- Main Code
+#------------------------------------------------------------------------------
+
+import pyudev
+import subprocess
+import signal
+import sys
+
+def signal_handler(signal, frame):
+        sys.exit(0)
+signal.signal(signal.SIGINT, signal_handler)
+
+context = pyudev.Context()
+monitor = pyudev.Monitor.from_netlink(context)
+monitor.filter_by(subsystem='usb')
+
+for device in iter(monitor.poll, None):
+    if device.action == 'add':
+#        print('{} connected'.format(device))
+
+        subprocess.call(["/usr/local/bin/thinkpad-dock.sh", str(device)])
+
+#------------------------------------------------------------------------------
+# --- End Script
+#------------------------------------------------------------------------------
