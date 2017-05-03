@@ -26,7 +26,8 @@ import signal
 import sys
 
 def signal_handler(signal, frame):
-        sys.exit(0)
+    print('KeyboardInterrupt')
+    sys.exit(0)
 signal.signal(signal.SIGINT, signal_handler)
 
 context = pyudev.Context()
