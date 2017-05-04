@@ -22,6 +22,9 @@
 
    . ${etcDir}/thinkpad-dock.conf
 
+   [[ -f ${etcDir}/thinkpad-dock.sh.debug ]] &&
+      exec >/tmp/$( basename $0 ).debug.log.$$ 2>&1 && set -x
+
 #------------------------------------------------------------------------------
 # --- Main Code
 #------------------------------------------------------------------------------
@@ -66,7 +69,7 @@
 
    #--------------------------------------
    # Execute scripts in S{scriptDir}
-   for script in $( ls ${scriptDir}/*.sh )
+   for script in $( ls ${scriptsDir}/*.sh )
    do
       if [[ ! -x ${script} ]]
       then
