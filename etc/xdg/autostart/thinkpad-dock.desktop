@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Encoding=UTF-8
+Name=Thinkpad Dock Daemon
+Comment=Run commands/scripts on Thinkpad Dock/Undock
+Exec=/usr/local/bin/thinkpad-dock.sh
+Terminal=false
+Categories=System
