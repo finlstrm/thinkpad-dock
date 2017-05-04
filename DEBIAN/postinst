@@ -30,6 +30,8 @@
    chmod 0755 /usr/local/bin/thinkpad-dock*
    chown root:root /usr/local/bin/thinkpad-dock*
 
+   chown root:root /etc/xdg/autostart/thinkpad-dock.desktop
+
    #--------------------------------------
    # install systemd service
    ln -s /lib/systemd/system/thinkpad-dock.service \
