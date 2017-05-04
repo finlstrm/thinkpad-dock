@@ -10,6 +10,41 @@
 #--- Main Code
 #------------------------------------------------------------------------------
 
+   #--------------------------------------
+   # Create the scripts directory if it doesn't exist
+   [[ ! -d /etc/thinkpad-dock/scripts ]] && mkdir /etc/thinkpad-dock/scripts
+
+   #--------------------------------------
+   # Change permissions to root, make sure nothing in here is
+   # executable (except scripts)
+   find ./etc/thinkpad-dock/ -type d \
+      -exec chmod 755 {} \; -exec chown root:root {} \;
+   find ./etc/thinkpad-dock/ -path "/etc/thinkpad-dock/scripts/*" \
+      -prune -o -type f -exec chmod 644 {} \; -exec chown root:root {} \;
+
+   #--------------------------------------
+   # Set permissions on other files
+   chmod 0644 /lib/systemd/system/thinkpad-dock.service
+   chown root:root /lib/systemd/system/thinkpad-dock.service
+
+   chmod 0755 /usr/local/bin/thinkpad-dock*py
+   chown root:root /usr/local/bin/thinkpad-dock*sh
+
+   #--------------------------------------
+   # install systemd service
+   ln -s /lib/systemd/system/thinkpad-dock.service \
+      /etc/systemd/system/thinkpad-dock.service
+   systemctl enable thinkpad-dock.service
+
+   if ls /etc/systemd/system/multi-user.target.wants/thinkpad-dock.service &>/dev/null
+   then
+      echo "INFO: installed thinkpad-dock.service - starting"
+      systemctl start thinkpad-dock.service
+   else
+      echo "ERR: unable to install thinkpad-dock.service"
+      exit 1
+   fi
+
    exit 0
 
 #------------------------------------------------------------------------------

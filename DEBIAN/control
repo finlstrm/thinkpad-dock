@@ -4,4 +4,6 @@ Architecture: ARCH
 Essential: no
 Maintainer: Michael J. Ford <Michael.Ford@slashetc.us>
 Installed-Size: INSTSIZE
-Description: A nice daemon and set of scripts for thinkpads and docks
+Depends: python3, python3-pyudev
+Description: A nice daemon and set of scripts for thinkpads and dock
+ This package runs scripts in /etc/thinkpad-dock/scripts when docked

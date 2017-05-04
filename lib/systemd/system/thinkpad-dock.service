@@ -1,0 +1,7 @@
+[Unit]
+Description = thinkpad-dock daemon
+After = lightdm.service
+[Service]
+ExecStart = /usr/local/bin/thinkpad-dock.py
+[Install]
+WantedBy = multi-user.target

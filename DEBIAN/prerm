@@ -1,3 +1,4 @@
+#!/bin/bash
 #------------------------------------------------------------------------------
 #
 # example post installation script
@@ -9,7 +10,26 @@
 #
 # This file does nothing, please edit to suit your needs
 #
+
+scripts="$( ls /etc/thinkpad-dock/scripts/ )"
+
+if [[ -z ${scripts} ]]
+then
+   rm -rf /etc/thinkpad-dock/scripts/
+else
+   echo "ERR: /etc/thinkpad-dock/scripts/ is not empty, not removing"
+fi
+
+if systemctl disable thinkpad-dock.service
+then
+   rm -f /etc/systemd/system/thinkpad-dock.service
+else
+   echo "ERR: unable to remove thinkpad-dock.service"
+   exit 1
+fi
+
 exit 0
+
 #
 #------------------------------------------------------------------------------
 #--- End Script
