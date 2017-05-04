@@ -25,6 +25,8 @@
    [[ -f ${etcDir}/thinkpad-dock.sh.debug ]] &&
       exec >/tmp/$( basename $0 ).debug.log.$$ 2>&1 && set -x
 
+   loggedInUsers="$( who | awk '/tty[7-9].*\(:[0-9]\)/{ print $1 }' )"
+
 #------------------------------------------------------------------------------
 # --- Main Code
 #------------------------------------------------------------------------------
@@ -75,8 +77,16 @@
       then
          logger "DEBUG: script ${script} is not executable"
       else
-         logger "INFO: running script ${script}"
-         ${script} && logger "INFO: ${script} success" || logger "FATAL: ${script} failed"
+         for user in ${loggedInUsers}
+         do
+            logger "INFO: running script ${script} as ${user}"
+            if su - ${user} -c "${script}"
+            then
+               logger "INFO: ${script} success"
+            else
+               logger "FATAL: ${script} failed"
+            fi
+         done
       fi
    done
 
