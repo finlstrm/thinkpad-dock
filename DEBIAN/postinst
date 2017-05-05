@@ -16,6 +16,7 @@
    #--------------------------------------
    # Change permissions to root, make sure nothing in here is
    # executable (except scripts)
+   echo "INFO: Setting file/directory permissions"
    find ./etc/thinkpad-dock/ -type d \
       -exec chmod 755 {} \; -exec chown root:root {} \;
    find ./etc/thinkpad-dock/ -path "/etc/thinkpad-dock/scripts/*" \
@@ -44,6 +45,8 @@
    # start systemd service thinkpad-dock.service
    if ls /etc/systemd/system/multi-user.target.wants/thinkpad-dock.service &>/dev/null
    then
+      echo "INFO: Reloading systemd units"
+      systemctl daemon-reload
       if ! systemctl status thinkpad-dock | grep -q 'Active: active (running)'
       then
          echo "INFO: installed thinkpad-dock.service - starting"

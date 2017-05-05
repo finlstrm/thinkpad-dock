@@ -15,6 +15,7 @@ upgrade()
    # Stop the service while we are upgrading
    if systemctl status thinkpad-dock | grep -q 'Active: active (running)'
    then
+      echo "INFO: Service is running, stopping it"
       systemctl stop thinkpad-dock
    fi
 }
