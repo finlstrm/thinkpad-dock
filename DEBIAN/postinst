@@ -1,10 +1,9 @@
 #!/bin/bash
 #------------------------------------------------------------------------------
 #
-# Package: sys-ldap-debian
+# Package: thinkpad-dock
 #
-# Provides: Postinst script for SlashETC LDAP Configuration
-#           Package is inteneded for Debian/Ubuntu based systems
+# Provides: postinst - post-installation script
 #
 #------------------------------------------------------------------------------
 #--- Main Code
@@ -34,14 +33,24 @@
 
    #--------------------------------------
    # install systemd service
-   ln -s /lib/systemd/system/thinkpad-dock.service \
-      /etc/systemd/system/thinkpad-dock.service
-   systemctl enable thinkpad-dock.service
+   if [[ ! -L /etc/systemd/system/thinkpad-dock.service ]]
+   then
+      ln -s /lib/systemd/system/thinkpad-dock.service \
+         /etc/systemd/system/thinkpad-dock.service
+         systemctl enable thinkpad-dock.service
+   fi
 
+   #--------------------------------------
+   # start systemd service thinkpad-dock.service
    if ls /etc/systemd/system/multi-user.target.wants/thinkpad-dock.service &>/dev/null
    then
-      echo "INFO: installed thinkpad-dock.service - starting"
-      systemctl start thinkpad-dock.service
+      if systemctl status thinkpad-dock | grep -q 'Active: active (running)'
+      then
+         echo "INFO: installed thinkpad-dock.service - starting"
+         systemctl start thinkpad-dock.service
+      else
+         echo "ERR: unable to start thinkpad-dock.service"
+      fi
    else
       echo "ERR: unable to install thinkpad-dock.service"
       exit 1
