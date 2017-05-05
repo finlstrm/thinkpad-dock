@@ -16,6 +16,9 @@
 # LastMod: 20170502 - Michael J. Ford <Michael.Ford@slashetc.us>
 #     - created
 #
+# LastMod: 20170504 - Michael J. Ford <Michael.Ford@slashetc.us>
+#     - added device removed function (undock)
+#
 #------------------------------------------------------------------------------
 # --- Main Code
 #------------------------------------------------------------------------------
@@ -36,9 +39,12 @@ monitor.filter_by(subsystem='usb')
 
 for device in iter(monitor.poll, None):
     if device.action == 'add':
-#        print('{} connected'.format(device))
+        subprocess.call(["/usr/local/bin/thinkpad-dock.sh", str(device)], docked)
+        #print('{} connected'.format(device))
 
-        subprocess.call(["/usr/local/bin/thinkpad-dock.sh", str(device)])
+    if device.action == 'remove':
+        subprocess.call(["/usr/local/bin/thinkpad-dock.sh", str(device)], undocked)
+        #print('{} disconnected'.format(device))
 
 #------------------------------------------------------------------------------
 # --- End Script

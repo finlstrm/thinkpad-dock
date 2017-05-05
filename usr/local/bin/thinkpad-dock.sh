@@ -15,6 +15,9 @@
 # LastMod: 20170502 - Michael J. Ford <Michael.Ford@slashetc.us>
 #     - created
 #
+# LastMod: 20170504 - Michael J. Ford <Michael.Ford@slashetc.us>
+#     - added initial support for docked/undocked, currently does nothing
+#
 #------------------------------------------------------------------------------
 
    etcDir=/etc/thinkpad-dock
@@ -27,11 +30,20 @@
 
    loggedInUsers="$( who | awk '/tty[7-9].*\(:[0-9]\)/{ print $1 }' )"
 
+   devicePath=$( echo ${1} | awk -F"'" '{ print $2 }' )
+   deviceAction=${2}
+
 #------------------------------------------------------------------------------
 # --- Main Code
 #------------------------------------------------------------------------------
 
-   devicePath=$( echo ${1} | awk -F"'" '{ print $2 }' )
+   #--------------------------------------
+   # temp code, will remove once supported
+   if [[ ${deviceAction} == remove ]]
+   then
+      logger "INFO: remove currently not supported"
+      exit 0
+   fi
 
    #--------------------------------------
    # Get device info, import variables
