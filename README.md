@@ -6,3 +6,7 @@ Daemon written in python/shell to launch scripts on thinkpad dock.
 
 Current supported Docks
    - Lenovo Thinkpad Mini Dock Plus Series 3
+
+Repositories:
+   - https://github.com/finlstrm/thinkpad-dock                 | Public Read/Write
+   - https://app.slashetc.us/gitlab/open-source/thinkpad-dock  | Public Read Only
