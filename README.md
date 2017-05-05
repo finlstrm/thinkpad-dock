@@ -4,6 +4,12 @@
 
 Daemon written in python/shell to launch scripts on thinkpad dock.
 
+# Installation
+
+Installation Guide Will Go Here...
+
+# Information
+
 **Current Supported Docks and Thinkpads:**
    - Lenovo Thinkpad Tx30 && Mini Dock Plus Series 3
 
@@ -13,3 +19,6 @@ Daemon written in python/shell to launch scripts on thinkpad dock.
 **Repositories:**
    - https://github.com/finlstrm/thinkpad-dock                 | Public Read/Write
    - https://app.slashetc.us/gitlab/open-source/thinkpad-dock  | Public Read Only
+
+# License
+Copyright :copyright: 2017 [Michael J. Ford](https://www.slashetc.us), released under The [GPLv3](https://www.gnu.org/licenses/gpl-3.0.en.html)
