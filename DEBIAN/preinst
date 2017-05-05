@@ -1,14 +1,30 @@
 #!/bin/bash
 #------------------------------------------------------------------------------
 #
-# Name : preinst
+# Package : thinkpad-dock
 #
-# Provides : Pre-Install routines for sys-serv-core
+# Provides : preinstallation routines
 #
 #------------------------------------------------------------------------------
 # --- Start Pre Install Script
 #------------------------------------------------------------------------------
 
+upgrade()
+{
+   #--------------------------------------
+   # Stop the service while we are upgrading
+   if systemctl status thinkpad-dock | grep -q 'Active: active (running)'
+   then
+      systemctl stop thinkpad-dock
+   fi
+}
+
+   case $1 in
+      upgrade)
+         upgrade
+         ;;
+      *) ;;
+   esac
 
    exit 0
 
