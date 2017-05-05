@@ -44,7 +44,7 @@
    # start systemd service thinkpad-dock.service
    if ls /etc/systemd/system/multi-user.target.wants/thinkpad-dock.service &>/dev/null
    then
-      if systemctl status thinkpad-dock | grep -q 'Active: active (running)'
+      if ! systemctl status thinkpad-dock | grep -q 'Active: active (running)'
       then
          echo "INFO: installed thinkpad-dock.service - starting"
          systemctl start thinkpad-dock.service
