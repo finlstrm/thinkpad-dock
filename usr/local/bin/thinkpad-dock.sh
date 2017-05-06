@@ -33,6 +33,9 @@
 #     - moved debug flag into debugFlag variable, easier updating as it's now
 #       checked in several places
 #
+# LastMod: 20170506 - Michael J. Ford <Michael.Ford@slashetc.us>
+#     - should be working now. undocked action still unsupported
+#
 #------------------------------------------------------------------------------
 
    etcDir=/etc/thinkpad-dock
@@ -63,7 +66,6 @@ run_user_scripts()
 #
 # Execute scripts in S{scriptDir}
 #
-
    userScripts="$( ls ${scriptsDir}/*.sh )"
 
    if [[ -z ${userScripts} ]]
@@ -78,26 +80,49 @@ run_user_scripts()
       then
          echo "DEBUG: script ${script} is not executable"
       else
-         if echo ${script} | grep -q root
+         if echo "${loggedInUsers}" | grep -q ${USER} &>/dev/null
          then
-            echo "INFO: running script ${script} as root"
-            ${script}
+            # If the logged in user is calling this,
+            # run scripts as that user
+            run_script ${script} ${deviceAction}
+
+         elif [[ -z ${USER} ]] && [[ -z ${loggedInUsers} ]]
+         then
+            # If the USER env var is not defined AND there are no logged in,
+            # just run the scripts (cuz we're probably root or lightdm
+            run_script ${script} ${deviceAction}
+
          else
             for user in ${loggedInUsers}
             do
-               echo "INFO: running script ${script} as ${user}"
-               if su - ${user} -c "${script} ${deviceAction}"
-               then
-                  echo "INFO: ${script} success"
-               else
-                  echo "FATAL: ${script} failed"
-               fi
+               # otherwise we're being called by the daemon (as root)
+               # run scripts as each login user
+               run_script ${script} ${deviceAction} ${user}
             done
          fi
       fi
    done
 
    return 0
+}
+
+#--------------------------------------
+
+run_script()
+{
+   local user=${3}
+   if [[ -z $3 ]]
+   then
+      echo "INFO: running script ${1}"
+      ${1} ${2}
+      echo "INFO: ${1} success"
+   else
+      echo "INFO: running script ${1} as ${user}"
+      /bin/su - ${user} -c "${1} ${2}"
+      echo "FATAL: ${1} failed"
+   fi
+
+   return $?
 }
 
 #--------------------------------------
@@ -133,7 +158,10 @@ remove_debug_file()
    pass=false
    for vendorId in ${supportedVendors}
    do
-      if [[ ${ID_VENDOR_ID} == ${vendorId} ]] || lsusb | grep -q ${vendorId}
+      if [[ ${ID_VENDOR_ID} == ${vendorId} ]]
+      then
+         pass=true ; break
+      elif [[ ${deviceAction} == auto-detect ]] && lsusb | grep -q ${vendorId}
       then
          pass=true ; break
       fi
@@ -150,7 +178,11 @@ remove_debug_file()
    pass=false
    for productId in ${supportedProducts}
    do
-      if echo ${PRODUCT} | grep -q ${productId} || lsusb | grep -q ${productId}
+      if echo ${PRODUCT} | grep -q ${productId}
+      then
+         deviceAction=docked
+         pass=true ; break
+      elif [[ ${deviceAction} == auto-detect ]] && lsusb | grep -q ${productId}
       then
          pass=true ; break
       fi
