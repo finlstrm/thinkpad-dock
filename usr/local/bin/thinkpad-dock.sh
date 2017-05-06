@@ -46,9 +46,9 @@
 
    loggedInUsers="$( who | awk '/tty[7-9].*\(:[0-9]\)/{ print $1 }' )"
 
-   if [[ ${devicePath} == login ]] || [[ ${devicePath} =~ lightdm ]]
+   if [[ -z ${1} ]]
    then
-      deviceAction=${devicePath}
+      deviceAction=auto-detect
    else
       devicePath=$( echo ${1} | awk -F"'" '{ print $2 }' )
       deviceAction=${2}
@@ -57,78 +57,6 @@
 #------------------------------------------------------------------------------
 # --- functions
 #------------------------------------------------------------------------------
-
-is_docked()
-{
-#
-# Check if ${devicePath} is a dock
-#
-   #--------------------------------------
-   # Get device info, import variables
-   eval $( udevadm info --path=${devicePath} | \
-      grep '=' | sed -e "s/E: //" -e "s/=/='/" -e "s/$/\'/" )
-
-   #--------------------------------------
-   # Check if VendorID is Supported
-   pass=false
-   for vendorId in ${supportedVendors}
-   do
-      if [[ ${ID_VENDOR_ID} == ${vendorId} ]]
-      then
-         pass=true ; break
-      fi
-   done
-
-   if ! ${pass}
-   then
-      remove_debug_file
-      return 1
-   fi
-
-   #--------------------------------------
-   # Check if ProductID is Supported
-   pass=false
-   for productId in ${supportedProducts}
-   do
-      if echo ${PRODUCT} | grep -q ${productId}
-      then
-         pass=true ; break
-      fi
-   done
-
-   if ! ${pass}
-   then
-      remove_debug_file
-      return 2
-   fi
-
-   #--------------------------------------
-   # We've gotten this far, it's supported. Lets log that
-   deviceName=$( lsusb -d ${vendorId}:${productId} \
-      | awk '{ for (i=7; i<=NF; i++) printf("%s ",$i) }END{ print"" }' )
-   echo "INFO: Found Supported Thinkpad Dock - " \
-      "${vendorId}:${productId} ${deviceName}"
-
-   return 0
-}
-
-#--------------------------------------
-
-remove_debug_file()
-{
-#
-# Disable debug for this run and remove all logs but docked
-# If keep is inside the debug flag then keep all logs
-#
-   if [[ -f ${debugFlag} ]] && ! grep -q keep ${debugFlag}
-   then
-      set +x
-      rm -f ${debugLog}
-   fi
-
-   return 0
-}
-#--------------------------------------
 
 run_user_scripts()
 {
@@ -172,32 +100,78 @@ run_user_scripts()
    return 0
 }
 
+#--------------------------------------
+
+remove_debug_file()
+{
+#
+# Disable debug for this run and remove all logs but docked
+# If keep is inside the debug flag then keep all logs
+#
+   if [[ -f ${debugFlag} ]] && ! grep -q keep ${debugFlag}
+   then
+      set +x
+      rm -f ${debugLog}
+   fi
+
+   return 0
+}
 #------------------------------------------------------------------------------
 # --- Main Code
 #------------------------------------------------------------------------------
 
-case ${deviceAction} in
-   docked)
-      if is_docked
+   if [[ ${deviceAction} != auto-detect ]]
+   then
+      #--------------------------------------
+      # Get device info, import variables
+      eval $( udevadm info --path=${devicePath} | \
+         grep '=' | sed -e "s/E: //" -e "s/=/='/" -e "s/$/\'/" )
+   fi
+
+   #--------------------------------------
+   # Check if VendorID is Supported
+   pass=false
+   for vendorId in ${supportedVendors}
+   do
+      if [[ ${ID_VENDOR_ID} == ${vendorId} ]] || lsusb | grep -q ${vendorId}
       then
-         run_user_scripts ; exit $?
-      fi ;;
-   undocked)
-      if [[ ${deviceAction} == undocked ]]
+         pass=true ; break
+      fi
+   done
+
+   if ! ${pass}
+   then
+      remove_debug_file
+      exit 1
+   fi
+
+   #--------------------------------------
+   # Check if ProductID is Supported
+   pass=false
+   for productId in ${supportedProducts}
+   do
+      if echo ${PRODUCT} | grep -q ${productId} || lsusb | grep -q ${productId}
       then
-         echo "INFO: undocked function currently not supported"
-         remove_debug_file
-         exit 0
-      fi ;;
-   login|lightdm*)
-      run_user_scripts
-      ;;
-#   *)
-#      if is_docked
-#      then
-#         run_user_scripts ; exit $?
-#      fi ;;
-esac
+         pass=true ; break
+      fi
+   done
+
+   if ! ${pass}
+   then
+      remove_debug_file
+      exit 2
+   fi
+
+   #--------------------------------------
+   # We've gotten this far, it's supported. Lets log that
+   deviceName=$( lsusb -d ${vendorId}:${productId} \
+      | awk '{ for (i=7; i<=NF; i++) printf("%s ",$i) }END{ print"" }' )
+   echo "INFO: Found Supported Thinkpad Dock - " \
+      "${vendorId}:${productId} ${deviceName}"
+
+   run_user_scripts
+
+   exit $?
 
 #------------------------------------------------------------------------------
 # --- End Script
