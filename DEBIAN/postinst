@@ -31,6 +31,9 @@
    chown root:root /usr/local/bin/thinkpad-dock*
 
    chmod 0644 /usr/share/lightdm/lightdm.conf.d/02_thinkpad-dock.conf
+   chmod 0644 /usr/share/lightdm/lightdm-gtk-greeter.conf.d/02_thinkpad-dock.conf
+   chown root:root /usr/share/lightdm/lightdm.conf.d/02_thinkpad-dock.conf
+   chown root:root /usr/share/lightdm/lightdm-gtk-greeter.conf.d/02_thinkpad-dock.conf
 
    chown root:root /etc/xdg/autostart/thinkpad-dock.desktop
 
