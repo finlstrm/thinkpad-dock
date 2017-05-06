@@ -23,6 +23,10 @@
 #     - added ability to run script as root if root is in the file name
 #     - changed all the logger commands to echo to stdout
 #
+# LastMod: 20170506 - Michael J. Ford <Michael.Ford@slashetc.us>
+#     - moved tasks into functions, further expanded direct docked/undocked
+#       support
+#
 #------------------------------------------------------------------------------
 
    etcDir=/etc/thinkpad-dock
@@ -35,21 +39,23 @@
 
    loggedInUsers="$( who | awk '/tty[7-9].*\(:[0-9]\)/{ print $1 }' )"
 
-   devicePath=$( echo ${1} | awk -F"'" '{ print $2 }' )
-   deviceAction=${2}
-
-#------------------------------------------------------------------------------
-# --- Main Code
-#------------------------------------------------------------------------------
-
-   #--------------------------------------
-   # temp code, will remove once supported
-   if [[ ${deviceAction} == remove ]]
+   if [[ ${devicePath} == login ]]
    then
-      echo "INFO: remove function currently not supported"
-      exit 0
+      deviceAction=${devicePath}
+   else
+      devicePath=$( echo ${1} | awk -F"'" '{ print $2 }' )
+      deviceAction=${2}
    fi
 
+#------------------------------------------------------------------------------
+# --- functions
+#------------------------------------------------------------------------------
+
+is_docked()
+{
+#
+# Check if ${devicePath} is a dock
+#
    #--------------------------------------
    # Get device info, import variables
    eval $( udevadm info --path=${devicePath} | \
@@ -65,7 +71,7 @@
          pass=true ; break
       fi
    done
-   ${pass} || exit 1
+   ${pass} || return 1
 
    #--------------------------------------
    # Check if ProductID is Supported
@@ -77,7 +83,7 @@
          pass=true ; break
       fi
    done
-   ${pass} || exit 2
+   ${pass} || return 2
 
    #--------------------------------------
    # We've gotten this far, it's supported. Lets log that
@@ -86,8 +92,16 @@
    echo "INFO: Found Supported Thinkpad Dock - " \
       "${vendorId}:${productId} ${deviceName}"
 
-   #--------------------------------------
-   # Execute scripts in S{scriptDir}
+   return 0
+}
+
+#--------------------------------------
+
+run_user_scripts()
+{
+#
+# Execute scripts in S{scriptDir}
+#
    for script in $( ls ${scriptsDir}/*.sh )
    do
       if [[ ! -x ${script} ]]
@@ -102,7 +116,7 @@
             for user in ${loggedInUsers}
             do
                echo "INFO: running script ${script} as ${user}"
-               if su - ${user} -c "${script}"
+               if su - ${user} -c "${script} ${deviceAction}"
                then
                   echo "INFO: ${script} success"
                else
@@ -114,6 +128,30 @@
    done
 
    [[ -z ${script} ]] && echo "INFO: no scripts found"
+}
+
+#------------------------------------------------------------------------------
+# --- Main Code
+#------------------------------------------------------------------------------
+
+case ${deviceAction} in
+   docked)
+      if is_docked
+      then
+         run_user_scripts ; exit $?
+      fi ;;
+   undocked)
+      #--------------------------------------
+      # temp code, will remove once supported
+      if [[ ${deviceAction} == undocked ]]
+      then
+         echo "INFO: undocked function currently not supported"
+         exit 0
+      fi ;;
+   login)
+      run_user_scripts
+      ;;
+esac
 
 #------------------------------------------------------------------------------
 # --- End Script
