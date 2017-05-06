@@ -46,7 +46,7 @@
 
    loggedInUsers="$( who | awk '/tty[7-9].*\(:[0-9]\)/{ print $1 }' )"
 
-   if [[ ${devicePath} == login ]]
+   if [[ ${devicePath} == login ]] || [[ ${devicePath} =~ lightdm ]]
    then
       deviceAction=${devicePath}
    else
@@ -183,17 +183,20 @@ case ${deviceAction} in
          run_user_scripts ; exit $?
       fi ;;
    undocked)
-      #--------------------------------------
-      # temp code, will remove once supported
       if [[ ${deviceAction} == undocked ]]
       then
          echo "INFO: undocked function currently not supported"
          remove_debug_file
          exit 0
       fi ;;
-   login)
+   login|lightdm*)
       run_user_scripts
       ;;
+#   *)
+#      if is_docked
+#      then
+#         run_user_scripts ; exit $?
+#      fi ;;
 esac
 
 #------------------------------------------------------------------------------

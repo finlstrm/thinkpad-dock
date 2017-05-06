@@ -3,6 +3,6 @@ Type=Application
 Encoding=UTF-8
 Name=Thinkpad Dock Daemon
 Comment=Run commands/scripts on Thinkpad Dock/Undock
-Exec=/usr/local/bin/thinkpad-dock.sh login
+Exec=bash -c "/usr/local/bin/thinkpad-dock.sh login"
 Terminal=false
 Categories=System
