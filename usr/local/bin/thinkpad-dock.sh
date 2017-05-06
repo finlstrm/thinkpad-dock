@@ -30,16 +30,19 @@
 #       if scripts exist or not
 #     - remove all debug files execpt the actuall docked/undocked run, execpt
 #       when the word 'keep' is in the debug flag
+#     - moved debug flag into debugFlag variable, easier updating as it's now
+#       checked in several places
 #
 #------------------------------------------------------------------------------
 
    etcDir=/etc/thinkpad-dock
    scriptsDir=${etcDir}/scripts
+   debugFlag=${etcDir}/thinkpad-dock.debug
 
    . ${etcDir}/thinkpad-dock.conf
 
    debugLog=/tmp/$( basename $0 ).debug.log.$$
-   [[ -f ${etcDir}/thinkpad-dock.debug ]] && exec >${debugLog} 2>&1 && set -x
+   [[ -f ${debugFlag} ]] && exec >${debugLog} 2>&1 && set -x
 
    loggedInUsers="$( who | awk '/tty[7-9].*\(:[0-9]\)/{ print $1 }' )"
 
@@ -117,7 +120,7 @@ remove_debug_file()
 # Disable debug for this run and remove all logs but docked
 # If keep is inside the debug flag then keep all logs
 #
-   if ! grep -q keep ${debugLog}
+   if [[ -f ${debugFlag} ]] && ! grep -q keep ${debugFlag}
    then
       set +x
       rm -f ${debugLog}
@@ -185,6 +188,7 @@ case ${deviceAction} in
       if [[ ${deviceAction} == undocked ]]
       then
          echo "INFO: undocked function currently not supported"
+         remove_debug_file
          exit 0
       fi ;;
    login)
