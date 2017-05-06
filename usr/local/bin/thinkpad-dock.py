@@ -19,6 +19,9 @@
 # LastMod: 20170504 - Michael J. Ford <Michael.Ford@slashetc.us>
 #     - added device removed function (undock)
 #
+# LastMod: 20170506 - Michael J. Ford <Michael.Ford@slashetc.us>
+#     - bugfix, docked/undocked was not a string, or included with subprocess.call
+#
 #------------------------------------------------------------------------------
 # --- Main Code
 #------------------------------------------------------------------------------
@@ -39,12 +42,12 @@ monitor.filter_by(subsystem='usb')
 
 for device in iter(monitor.poll, None):
     if device.action == 'add':
-        subprocess.call(["/usr/local/bin/thinkpad-dock.sh", str(device)], docked)
-        #print('{} connected'.format(device))
+        print('{} connected'.format(device))
+        subprocess.call(["/usr/local/bin/thinkpad-dock.sh", str(device), "docked"])
 
     if device.action == 'remove':
-        subprocess.call(["/usr/local/bin/thinkpad-dock.sh", str(device)], undocked)
-        #print('{} disconnected'.format(device))
+        print('{} disconnected'.format(device))
+        subprocess.call(["/usr/local/bin/thinkpad-dock.sh", str(device), "undocked"])
 
 #------------------------------------------------------------------------------
 # --- End Script
