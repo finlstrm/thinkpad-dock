@@ -30,8 +30,7 @@
    chmod 0755 /usr/local/bin/thinkpad-dock*
    chown root:root /usr/local/bin/thinkpad-dock*
 
-   chmod 0755 /etc/lightdm/lightdm.conf.d
-   chmod 0644 /etc/lightdm/lightdm.conf.d/10-thinkpad_dock_lightdm.conf
+   chmod 0644 /usr/share/lightdm/lightdm.conf.d/02_thinkpad-dock.conf
 
    chown root:root /etc/xdg/autostart/thinkpad-dock.desktop
 
