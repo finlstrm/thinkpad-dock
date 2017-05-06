@@ -26,6 +26,10 @@
 # LastMod: 20170506 - Michael J. Ford <Michael.Ford@slashetc.us>
 #     - moved tasks into functions, further expanded direct docked/undocked
 #       support
+#     - moved listing of user installed scripts to variable for better checking
+#       if scripts exist or not
+#     - remove all debug files execpt the actuall docked/undocked run, execpt
+#       when the word 'keep' is in the debug flag
 #
 #------------------------------------------------------------------------------
 
@@ -34,8 +38,8 @@
 
    . ${etcDir}/thinkpad-dock.conf
 
-   [[ -f ${etcDir}/thinkpad-dock.sh.debug ]] &&
-      exec >/tmp/$( basename $0 ).debug.log.$$ 2>&1 && set -x
+   debugLog=/tmp/$( basename $0 ).debug.log.$$
+   [[ -f ${etcDir}/thinkpad-dock.debug ]] && exec >${debugLog} 2>&1 && set -x
 
    loggedInUsers="$( who | awk '/tty[7-9].*\(:[0-9]\)/{ print $1 }' )"
 
@@ -71,7 +75,12 @@ is_docked()
          pass=true ; break
       fi
    done
-   ${pass} || return 1
+
+   if ! ${pass}
+   then
+      remove_debug_file
+      return 1
+   fi
 
    #--------------------------------------
    # Check if ProductID is Supported
@@ -83,7 +92,12 @@ is_docked()
          pass=true ; break
       fi
    done
-   ${pass} || return 2
+
+   if ! ${pass}
+   then
+      remove_debug_file
+      return 2
+   fi
 
    #--------------------------------------
    # We've gotten this far, it's supported. Lets log that
@@ -97,12 +111,37 @@ is_docked()
 
 #--------------------------------------
 
+remove_debug_file()
+{
+#
+# Disable debug for this run and remove all logs but docked
+# If keep is inside the debug flag then keep all logs
+#
+   if ! grep -q keep ${debugLog}
+   then
+      set +x
+      rm -f ${debugLog}
+   fi
+
+   return 0
+}
+#--------------------------------------
+
 run_user_scripts()
 {
 #
 # Execute scripts in S{scriptDir}
 #
-   for script in $( ls ${scriptsDir}/*.sh )
+
+   userScripts="$( ls ${scriptsDir}/*.sh )"
+
+   if [[ -z ${userScripts} ]]
+   then
+      echo "INFO: no user scripts found"
+      return 0
+   fi
+
+   for script in ${userScripts}
    do
       if [[ ! -x ${script} ]]
       then
@@ -127,7 +166,7 @@ run_user_scripts()
       fi
    done
 
-   [[ -z ${script} ]] && echo "INFO: no scripts found"
+   return 0
 }
 
 #------------------------------------------------------------------------------
